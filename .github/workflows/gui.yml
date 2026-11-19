@@ -13,6 +13,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Apply host portability patch
+        shell: bash
+        run: |
+          if git -C installer apply --check ../.github/patches/host-portability.patch; then
+            git -C installer apply ../.github/patches/host-portability.patch
+          elif git -C installer apply --check --reverse ../.github/patches/host-portability.patch; then
+            echo "patch already present in the submodule"
+          else
+            echo "host-portability.patch no longer matches installer; refresh .github/patches/host-portability.patch" >&2
+            exit 1
+          fi
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
